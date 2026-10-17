@@ -4,7 +4,6 @@ import com.library_management.common.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,11 +18,14 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/books")
-@RequiredArgsConstructor
 @Tag(name = "Books", description = "Book management API")
 public class BookController {
 
     private final BookService bookService;
+
+    public BookController(BookService bookService) {
+        this.bookService = bookService;
+    }
 
     @GetMapping
     @Operation(summary = "Get all books")

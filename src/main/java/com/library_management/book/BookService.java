@@ -1,16 +1,18 @@
 package com.library_management.book;
 
 import com.library_management.common.ResourceNotFoundException;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class BookService {
 
     private final BookRepository bookRepository;
+
+    public BookService(BookRepository bookRepository) {
+        this.bookRepository = bookRepository;
+    }
 
     public List<BookResponse> getAllBooks() {
         return bookRepository.findAll().stream()
