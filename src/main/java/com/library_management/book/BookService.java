@@ -1,6 +1,6 @@
 package com.library_management.book;
 
-import com.library_management.common.ResourceNotFoundException;
+import com.library_management.common.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

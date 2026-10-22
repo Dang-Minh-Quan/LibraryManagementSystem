@@ -1,4 +1,4 @@
-package com.library_management.common;
+package com.library_management.common.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 

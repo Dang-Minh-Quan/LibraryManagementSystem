@@ -1,4 +1,6 @@
 package com.library_management.borrowing;
 
-public class BorrowingStatus {
+public enum BorrowingStatus {
+  BORROWING,
+  RETURNED
 }

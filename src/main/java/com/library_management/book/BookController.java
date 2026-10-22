@@ -1,6 +1,6 @@
 package com.library_management.book;
 
-import com.library_management.common.ApiResponse;
+import com.library_management.common.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

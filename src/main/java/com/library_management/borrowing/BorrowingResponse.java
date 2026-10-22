@@ -9,6 +9,15 @@ public class BorrowingResponse {
   private LocalDateTime borrowedAt;
   private LocalDateTime dueDate;
 
+  public BorrowingResponse(Long id, Long bookId, String status, LocalDateTime borrowedAt,
+      LocalDateTime dueDate) {
+    this.id = id;
+    this.bookId = bookId;
+    this.status = status;
+    this.borrowedAt = borrowedAt;
+    this.dueDate = dueDate;
+  }
+
   public Long getId() {
     return id;
   }
