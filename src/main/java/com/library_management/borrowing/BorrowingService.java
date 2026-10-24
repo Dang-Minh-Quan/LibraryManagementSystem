@@ -85,4 +85,37 @@ public class BorrowingService {
         ))
         .toList();
   }
+
+  @Transactional
+  public BorrowingResponse returnBook(Long borrowingId, String username) {
+    Borrowing borrowing = borrowingRepository.findById(borrowingId)
+        .orElseThrow(() ->
+            new ResourceNotFoundException("Borrowing not found!"));
+
+    User user = userRepository.findByUsername(username)
+        .orElseThrow(() ->
+            new ResourceNotFoundException("User not found!"));
+
+    if(!borrowing.getUser().getId().equals(user.getId())) {
+      throw new BorrowingException(HttpStatus.FORBIDDEN,"Cannot return another user's borrowing!");
+    }
+
+    if(borrowing.getStatus()!=BorrowingStatus.BORROWING) {
+      throw new BorrowingException(HttpStatus.BAD_REQUEST,"This borrowing has already been returned!");
+    }
+
+    borrowing.setStatus(BorrowingStatus.RETURNED);
+    borrowing.setReturnedAt(LocalDateTime.now());
+
+    Book book = borrowing.getBook();
+    book.setAvailableQuantity(book.getAvailableQuantity() + 1);
+
+    return new BorrowingResponse(
+        borrowing.getId(),
+        book.getId(),
+        borrowing.getStatus().name(),
+        borrowing.getBorrowedAt(),
+        borrowing.getDueDate()
+    );
+  }
 }

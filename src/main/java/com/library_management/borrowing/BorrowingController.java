@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,5 +38,15 @@ public class BorrowingController {
   public ResponseEntity<List<BorrowingResponse>> getMyBorrowings(Authentication authentication) {
     List<BorrowingResponse> responses = borrowingService.getMyBorrowings(authentication.getName());
     return ResponseEntity.ok(responses);
+  }
+
+  @PostMapping("/{id}/return")
+  public ResponseEntity<BorrowingResponse> returnBook(
+      @PathVariable Long id,
+      Authentication authentication
+  ) {
+    String username = authentication.getName();
+    BorrowingResponse response = borrowingService.returnBook(id, username);
+    return ResponseEntity.ok(response);
   }
 }
