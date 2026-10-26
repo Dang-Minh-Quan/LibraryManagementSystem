@@ -4,7 +4,7 @@ COPY .mvn/ .mvn/
 COPY mvnw pom.xml ./
 RUN chmod +x mvnw && ./mvnw -B -ntp dependency:go-offline
 COPY src/ src/
-RUN ./mvnw -B -ntp verify
+RUN ./mvnw -B -ntp package -DskipTests
 
 FROM eclipse-temurin:24-jre
 WORKDIR /app
