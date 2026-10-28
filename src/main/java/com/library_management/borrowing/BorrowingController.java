@@ -3,7 +3,6 @@ package com.library_management.borrowing;
 import com.library_management.common.response.ApiError;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -74,7 +73,7 @@ public class BorrowingController {
   })
   @PostMapping
   public ResponseEntity<BorrowingResponse> borrowBook(
-      @RequestBody BorrowBookRequest request,
+      @RequestBody BorrowingRequest request,
       Authentication authentication
   ) {
     String username = authentication.getName();

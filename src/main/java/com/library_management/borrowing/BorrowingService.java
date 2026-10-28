@@ -26,7 +26,7 @@ public class BorrowingService {
   }
 
   @Transactional
-  public BorrowingResponse borrowBook(String username, BorrowBookRequest request) {
+  public BorrowingResponse borrowBook(String username, BorrowingRequest request) {
     User user = userRepository.findByUsername(username)
         .orElseThrow(() ->
             new ResourceNotFoundException("User not found"));

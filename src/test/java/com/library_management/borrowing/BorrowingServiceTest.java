@@ -13,7 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -61,7 +61,7 @@ public class BorrowingServiceTest {
     when(borrowingRepository.save(any(Borrowing.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
 
-    BorrowBookRequest request = new BorrowBookRequest();
+    BorrowingRequest request = new BorrowingRequest();
     request.setBookId(5L);
 
     BorrowingResponse response = borrowingService.borrowBook(
@@ -82,7 +82,7 @@ public class BorrowingServiceTest {
     when(bookRepository.findById(5L))
         .thenReturn(Optional.empty());
 
-    BorrowBookRequest request = new BorrowBookRequest();
+    BorrowingRequest request = new BorrowingRequest();
     request.setBookId(5L);
 
     assertThatThrownBy(() ->
@@ -104,7 +104,7 @@ public class BorrowingServiceTest {
     when(bookRepository.findById(5L))
         .thenReturn(Optional.of(book));
 
-    BorrowBookRequest request = new BorrowBookRequest();
+    BorrowingRequest request = new BorrowingRequest();
     request.setBookId(5L);
 
     assertThatThrownBy(() ->
@@ -128,7 +128,7 @@ public class BorrowingServiceTest {
         1L, BorrowingStatus.BORROWING))
         .thenReturn(5L);
 
-    BorrowBookRequest request = new BorrowBookRequest();
+    BorrowingRequest request = new BorrowingRequest();
     request.setBookId(5L);
 
     assertThatThrownBy(() ->

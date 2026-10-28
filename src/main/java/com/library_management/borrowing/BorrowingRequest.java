@@ -1,6 +1,6 @@
 package com.library_management.borrowing;
 
-public class BorrowBookRequest {
+public class BorrowingRequest {
   private Long bookId;
 
   public Long getBookId() {
