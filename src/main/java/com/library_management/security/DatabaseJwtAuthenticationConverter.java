@@ -4,7 +4,6 @@ import com.library_management.user.User;
 import com.library_management.user.UserRepository;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.InvalidBearerTokenException;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -21,8 +20,7 @@ public class DatabaseJwtAuthenticationConverter implements Converter<Jwt, Abstra
     public AbstractAuthenticationToken convert(Jwt jwt) {
         User user = users.findById(Long.valueOf(jwt.getSubject()))
                 .orElseThrow(() -> new InvalidBearerTokenException("User no longer exists"));
-        // Read the current role: deleting or demoting an account takes effect immediately.
-        return new JwtAuthenticationToken(jwt,
-                List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name())), user.getUsername());
+        // Verify the account still exists. Stored roles do not grant special permissions.
+        return new JwtAuthenticationToken(jwt, List.of(), user.getUsername());
     }
 }

@@ -8,6 +8,7 @@ import com.library_management.user.persistence.JpaUserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,7 +16,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
@@ -48,7 +49,6 @@ class AuthSecurityIntegrationTest {
     @Autowired JwtEncoder encoder;
     @Autowired JwtDecoder decoder;
     @Autowired JwtProperties properties;
-    @Autowired JdbcTemplate jdbc;
 
     @BeforeEach
     void clearUsers() { users.deleteAll(); }
@@ -79,7 +79,7 @@ class AuthSecurityIntegrationTest {
     }
 
     @Test
-    void callerCannotRegisterAsAdmin() throws Exception {
+    void registrationIgnoresClientProvidedRole() throws Exception {
         mvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON)
                         .content("{\"username\":\"reader\",\"password\":\"secret123\",\"role\":\"ADMIN\"}"))
                 .andExpect(status().isCreated()).andExpect(jsonPath("$.role").value("USER"));
@@ -165,15 +165,15 @@ class AuthSecurityIntegrationTest {
         mvc.perform(post("/api/borrowings/1/return")).andExpect(status().isUnauthorized());
     }
 
-    @Test
-    void usersCanBorrowButCannotManageBooks() throws Exception {
-        createUser("reader", Role.USER);
+    @ParameterizedTest
+    @EnumSource(Role.class)
+    void authenticatedAccountsCanManageBooksAndBorrowRegardlessOfStoredRole(Role role) throws Exception {
+        createUser("reader", role);
         String token = login("reader", "secret123");
         mvc.perform(post("/api/books").header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
-                .andExpect(status().isForbidden()).andExpect(jsonPath("$.status").value(403))
-                .andExpect(jsonPath("$.message").value("Access denied"));
+                .andExpect(status().isOk()).andExpect(jsonPath("$.securityProbe").value(true));
         mvc.perform(delete("/api/books/1").header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isOk()).andExpect(jsonPath("$.securityProbe").value(true));
         mvc.perform(post("/api/borrowings").header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.securityProbe").value(true));
         mvc.perform(get("/api/borrowings/me").header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
@@ -183,16 +183,13 @@ class AuthSecurityIntegrationTest {
     }
 
     @Test
-    void adminsCanManageBooksAndDemotionTakesEffectOnExistingToken() throws Exception {
-        User admin = createUser("admin", Role.ADMIN);
-        String token = login("admin", "secret123");
-        mvc.perform(post("/api/books").header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
-                .andExpect(status().isOk()).andExpect(jsonPath("$.securityProbe").value(true));
-        mvc.perform(delete("/api/books/1").header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
-                .andExpect(status().isOk());
-        jdbc.update("update users set role = ? where id = ?", "USER", admin.getId());
-        mvc.perform(post("/api/books").header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
-                .andExpect(status().isForbidden());
+    void accessDeniedErrorsKeepConsistentJsonWithoutRoleRestrictions() throws Exception {
+        createUser("reader", Role.USER);
+        String token = login("reader", "secret123");
+        mvc.perform(get("/api/test/forbidden").header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+                .andExpect(status().isForbidden()).andExpect(jsonPath("$.status").value(403))
+                .andExpect(jsonPath("$.message").value("Access denied"))
+                .andExpect(jsonPath("$.timestamp").isNotEmpty());
     }
 
     @Test
@@ -275,6 +272,10 @@ class AuthSecurityIntegrationTest {
     /** Test-only endpoints verify the filter rules before Book/Borrowing modules are merged. */
     @RestController
     static class SecurityProbeController {
+        @GetMapping("/api/test/forbidden")
+        @PreAuthorize("denyAll()")
+        public Map<String, Boolean> forbiddenProbe() { return Map.of("securityProbe", true); }
+
         @GetMapping({"/api/books", "/api/books/{id}", "/api/borrowings/me"})
         Map<String, Boolean> getProbe() { return Map.of("securityProbe", true); }
         @PostMapping({"/api/books", "/api/borrowings", "/api/borrowings/{id}/return"})

@@ -28,8 +28,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/auth/register", "/api/auth/login").permitAll()
                         .requestMatchers(HttpMethod.GET, "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs", "/v3/api-docs/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/books", "/api/books/*").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/books").permitAll()
-                        .requestMatchers(HttpMethod.DELETE, "/api/books/*").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/books").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/books/*").authenticated()
                         .anyRequest().authenticated())
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint(errors).accessDeniedHandler(errors))
