@@ -249,7 +249,7 @@ class AuthSecurityIntegrationTest {
                         .content(credentials(username, password)))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.tokenType").value("Bearer"))
                 .andExpect(jsonPath("$.accessToken").isNotEmpty()).andReturn();
-        return mapper.readTree(response.getResponse().getContentAsString()).get("accessToken").asText();
+        return mapper.readTree(response.getResponse().getContentAsString()).get("accessToken").asString();
     }
 
     private JwtClaimsSet.Builder claims(User user) {
