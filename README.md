@@ -90,9 +90,11 @@ Có thể xem tài liệu tương tác thông qua Swagger UI khi ứng dụng đ
 
 Phase 2 nên ưu tiên các vấn đề ảnh hưởng trực tiếp đến quyền quản lý sách, tính đúng đắn của dữ liệu mượn/trả và khả năng phục vụ khi quy mô sử dụng tăng.
 
-| Vấn đề chính | Ảnh hưởng trong dự án hiện tại | Hướng xử lý |
-|---|---|---|
-| **Quyền quản lý sách chưa tách khỏi người mượn.** | Mọi tài khoản đã đăng nhập đều có thể thêm hoặc xóa sách. Nếu hệ thống có vai trò thủ thư/quản trị, chính sách hiện tại chưa giới hạn các thao tác thay đổi kho sách cho đúng người phụ trách. | Thống nhất vai trò nghiệp vụ với nhóm tiếp nhận; bổ sung phân quyền và kiểm thử quyền truy cập cho các thao tác quản lý sách. |
-| **Chưa có quy tắc xóa sách đã phát sinh phiếu mượn.** | API xóa trực tiếp sau khi kiểm tra sách tồn tại. Sách đã được mượn có thể bị database từ chối xóa do khóa ngoại, nhưng backend chưa phản hồi bằng lỗi nghiệp vụ rõ ràng. Việc xử lý xóa phải bảo toàn các phiếu và lịch sử mượn/trả. | Chọn chính sách ngừng lưu hành/xóa mềm hoặc từ chối xóa sách có lịch sử; kiểm thử cả trường hợp sách đang được mượn và đã được trả. |
-| **Gửi lại yêu cầu mượn có thể phát sinh phiếu ngoài ý muốn.** | Khi backend đã lưu phiếu nhưng client mất phản hồi, gửi lại cùng yêu cầu có thể tạo thêm phiếu và giảm tiếp số lượng khả dụng nếu vẫn còn sách và chưa vượt giới hạn. Transaction và khóa bản ghi chưa giải quyết việc nhận diện hai request là cùng một thao tác. | Bổ sung cơ chế nhận diện yêu cầu gửi lại, chẳng hạn idempotency key, để trả kết quả đã xử lý thay vì tạo phiếu mới. |
-| **Khả năng đáp ứng khi dữ liệu và lượng truy cập tăng cần được đánh giá.** | API danh sách đang lấy toàn bộ sách hoặc phiếu của người dùng. Đồng thời, các yêu cầu mượn/trả cùng sách hoặc tài khoản có thể phải chờ khóa. Đây là các điểm có thể làm tăng thời gian phản hồi khi thư viện lớn hơn, chưa phải kết luận từ benchmark. | Bổ sung phân trang; đo truy vấn, thời gian chờ khóa và tải trên các đầu sách được mượn nhiều. Dựa vào kết quả đo để tối ưu, đồng thời giữ các quy tắc về tồn kho và giới hạn mượn. |
+## Các vấn đề và hướng cải tiến ở Phase 2
+
+| Vấn đề tại Phase 1 | Cải tiến tại Phase 2 |
+|---|---|
+| **1. Xóa sách đã có lịch sử mượn:** Việc xóa sách đã có phiếu mượn có thể gây lỗi hoặc ảnh hưởng đến lịch sử mượn/trả. | Bổ sung cơ chế ngừng lưu hành sách hoặc không cho xóa sách đã có lịch sử mượn để bảo toàn dữ liệu. |
+| **2. Gửi yêu cầu mượn sách nhiều lần:** Khi không nhận được phản hồi, người dùng có thể gửi lại yêu cầu và vô tình tạo nhiều phiếu mượn cho cùng một thao tác. | Bổ sung cơ chế nhận diện yêu cầu trùng lặp để tránh tạo nhiều phiếu mượn và giảm số lượng sách nhiều lần. |
+| **3. Hiệu năng khi dữ liệu tăng:** Khi số lượng sách, phiếu mượn và người dùng tăng, việc tải toàn bộ dữ liệu cùng lúc có thể khiến hệ thống phản hồi chậm. | Bổ sung phân trang, kiểm tra và tối ưu truy vấn cơ sở dữ liệu, đồng thời kiểm thử hiệu năng để đánh giá khả năng đáp ứng của hệ thống. |
+| **4. Người dùng không đến nhận sách:** Người dùng tạo phiếu mượn nhưng không đến thư viện nhận sách có thể khiến số lượng sách khả dụng bị giảm dù việc mượn chưa thực sự diễn ra. | Bổ sung trạng thái `PENDING_PICKUP` (chờ nhận sách) và cơ chế tự động hủy phiếu khi quá thời hạn nhận. Khi hủy, hệ thống cập nhật lại số lượng sách khả dụng. |
