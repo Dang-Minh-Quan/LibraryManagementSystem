@@ -49,19 +49,19 @@ Một lượt sử dụng điển hình là xem sách, đăng nhập, chọn sá
 
 #### 3.1. Từ tài khoản đến phiếu mượn
 
-1. **Tạo tài khoản và đăng nhập.** Người dùng đăng ký bằng `username` và mật khẩu. Username phải duy nhất; mật khẩu được băm bằng BCrypt trước khi lưu. Đăng nhập thành công trả về access token JWT để gọi các API được bảo vệ. API `/api/users/me` cho phép xem thông tin tài khoản hiện tại, chưa hỗ trợ sửa hồ sơ.
-2. **Tra cứu và quản lý sách.** Mỗi đầu sách có thông tin tên, tác giả, ISBN, thể loại, tổng số bản (`quantity`) và số bản còn cho mượn (`availableQuantity`). Danh sách và chi tiết sách được xem công khai. Thêm hoặc xóa sách yêu cầu đăng nhập; phiên bản hiện tại chưa giới hạn hai thao tác này cho vai trò ADMIN.
-3. **Mượn một bản sách.** Client gửi `bookId`; backend xác định người mượn từ tài khoản đã xác thực, không nhận user ID do client tự chọn. Hệ thống kiểm tra sách tồn tại, còn bản khả dụng và tài khoản đang có dưới **5 phiếu mượn hoạt động**. Khi hợp lệ, backend tạo phiếu `BORROWING`, ghi thời điểm mượn, hạn trả và giảm `availableQuantity` đi 1. Mỗi request thành công tương ứng một phiếu mượn cho một bản sách; hạn trả mặc định là **14 ngày**, cấu hình bằng `BORROWING_LOAN_DAYS`.
+1. **Tạo tài khoản và đăng nhập.** Người dùng đăng ký bằng `username` và mật khẩu. Username phải duy nhất; Đăng nhập thành công trả về access token JWT để gọi các API được bảo vệ. API `/api/users/me` cho phép xem thông tin tài khoản hiện tại.
+2. **Tra cứu và quản lý sách.** Mỗi đầu sách có thông tin tên, tác giả, thể loại, tổng số bản (`quantity`) và số bản còn cho mượn (`availableQuantity`). Danh sách và chi tiết sách được xem công khai. Thêm hoặc xóa sách yêu cầu đăng nhập.
+3. **Mượn một bản sách.** Client gửi `bookId`; backend xác định người mượn từ tài khoản đã xác thực. Hệ thống kiểm tra sách tồn tại, còn bản khả dụng và tài khoản đang có dưới **5 phiếu mượn hoạt động**. Khi hợp lệ, backend tạo phiếu `BORROWING`, ghi thời điểm mượn, hạn trả và cập nhật `availableQuantity`. Mỗi request thành công tương ứng một phiếu mượn cho một bản sách; hạn trả mặc định là **14 ngày**, cấu hình bằng `BORROWING_LOAN_DAYS`.
 4. **Theo dõi việc mượn.** API `/api/borrowings/me` trả các phiếu của người đang đăng nhập, gồm ID phiếu, ID sách, trạng thái, ngày mượn và hạn trả. Danh sách gồm cả phiếu đang mượn lẫn phiếu đã trả; chỉ phiếu `BORROWING` được tính vào giới hạn 5 phiếu.
-5. **Trả sách bằng ID phiếu mượn.** Client gửi ID phiếu trên đường dẫn API trả sách, không dùng ID sách thay thế. Backend kiểm tra phiếu tồn tại, thuộc tài khoản hiện tại và vẫn ở trạng thái `BORROWING`. Trả thành công chuyển trạng thái sang `RETURNED`, lưu thời điểm trả và tăng `availableQuantity` lên 1. Trả lại cùng một phiếu bị từ chối để tránh tăng sai tồn kho.
+5. **Trả sách bằng ID phiếu mượn.** Client gửi ID phiếu cho API trả sách, không dùng ID sách thay thế. Backend kiểm tra phiếu tồn tại của tài khoản hiện tại và vẫn ở trạng thái `BORROWING`. Trả thành công chuyển trạng thái sang `RETURNED`, lưu thời điểm trả và cập nhật `availableQuantity`. Trả lại cùng một phiếu bị từ chối để tránh sai sót.
 
-#### 3.2. Kiểm soát dữ liệu và yêu cầu đồng thời
+#### 3.2. Kiểm soát dữ liệu
 
-- **Số lượng sách:** khi tạo sách, tổng số bản và số bản khả dụng phải không âm; `availableQuantity` không được lớn hơn `quantity`. ISBN có ràng buộc duy nhất trong database.
-- **Quyền sở hữu:** người dùng chỉ xem danh sách phiếu của mình và trả phiếu thuộc tài khoản của mình. Biết ID phiếu của người khác không đồng nghĩa có quyền trả phiếu đó.
+- **Số lượng sách:** khi tạo sách, tổng số bản và số bản khả dụng phải không âm; `availableQuantity` không được lớn hơn `quantity`.
+- **Quyền sở hữu:** người dùng chỉ xem danh sách phiếu của mình và trả phiếu thuộc tài khoản của mình.
 - **Transaction:** tạo/cập nhật phiếu và thay đổi số lượng khả dụng được thực hiện trong cùng transaction. Nếu thao tác thất bại và transaction bị rollback, các thay đổi dữ liệu đi cùng cũng bị hủy.
-- **Khóa bản ghi:** luồng mượn khóa tài khoản trước rồi khóa sách. Luồng trả khóa tài khoản, phiếu mượn và sách. Khóa ghi bi quan giúp các request liên quan cùng tài khoản hoặc cùng sách lần lượt kiểm tra dữ liệu hiện hành, nhằm giữ giới hạn mượn và cập nhật đúng số lượng khả dụng.
-- **Phản hồi lỗi:** thiếu hoặc sai token trả `401`; trả phiếu của người khác trả `403`; sách/phiếu không tồn tại trả `404`; lỗi validation request, hết sách, vượt giới hạn hoặc trả trùng trả `400`. Client cần đọc thông báo lỗi để hiển thị lý do cho người dùng.
+- **Khóa bản ghi:** luồng mượn khóa tài khoản trước rồi khóa sách. Luồng trả khóa tài khoản, phiếu mượn và sách. Các request liên quan cùng tài khoản hoặc cùng sách lần lượt được kiểm tra dữ liệu hiện hành, nhằm giữ giới hạn mượn và cập nhật đúng số lượng khả dụng.
+- **Phản hồi lỗi:** thiếu hoặc sai token trả `401`; trả phiếu của người khác trả `403`; sách/phiếu không tồn tại trả `404`; lỗi validation request, hết sách, vượt giới hạn hoặc trả trùng trả `400`. Client đọc thông báo lỗi để hiển thị lý do cho người dùng.
 
 ### 4. Đặc tả API
 
