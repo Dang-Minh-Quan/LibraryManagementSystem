@@ -92,9 +92,12 @@ Phase 2 nên ưu tiên các vấn đề ảnh hưởng trực tiếp đến quy�
 
 ## Các vấn đề và hướng cải tiến ở Phase 2
 
+## Các vấn đề và hướng cải tiến ở Phase 2
+
 | Vấn đề tại Phase 1 | Cải tiến tại Phase 2 |
 |---|---|
 | **1. Xóa sách đã có lịch sử mượn:** Việc xóa sách đã có phiếu mượn có thể gây lỗi hoặc ảnh hưởng đến lịch sử mượn/trả. | Bổ sung cơ chế ngừng lưu hành sách hoặc không cho xóa sách đã có lịch sử mượn để bảo toàn dữ liệu. |
 | **2. Gửi yêu cầu mượn sách nhiều lần:** Khi không nhận được phản hồi, người dùng có thể gửi lại yêu cầu và vô tình tạo nhiều phiếu mượn cho cùng một thao tác. | Bổ sung cơ chế nhận diện yêu cầu trùng lặp để tránh tạo nhiều phiếu mượn và giảm số lượng sách nhiều lần. |
 | **3. Hiệu năng khi dữ liệu tăng:** Khi số lượng sách, phiếu mượn và người dùng tăng, việc tải toàn bộ dữ liệu cùng lúc có thể khiến hệ thống phản hồi chậm. | Bổ sung phân trang, kiểm tra và tối ưu truy vấn cơ sở dữ liệu, đồng thời kiểm thử hiệu năng để đánh giá khả năng đáp ứng của hệ thống. |
 | **4. Người dùng không đến nhận sách:** Người dùng tạo phiếu mượn nhưng không đến thư viện nhận sách có thể khiến số lượng sách khả dụng bị giảm dù việc mượn chưa thực sự diễn ra. | Bổ sung trạng thái `PENDING_PICKUP` (chờ nhận sách) và cơ chế tự động hủy phiếu khi quá thời hạn nhận. Khi hủy, hệ thống cập nhật lại số lượng sách khả dụng. |
+| **5. Chưa kiểm soát các yêu cầu đăng nhập bất thường:** Nếu API đăng nhập không giới hạn số lần thử, kẻ xấu có thể gửi nhiều yêu cầu liên tục để thử mật khẩu hoặc gây tiêu tốn tài nguyên hệ thống. | Bổ sung giới hạn tần suất đăng nhập, ghi nhận các lần đăng nhập thất bại và kiểm thử khả năng chống gửi yêu cầu liên tục. |
