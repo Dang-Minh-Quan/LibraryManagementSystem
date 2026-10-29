@@ -47,7 +47,7 @@ Hệ thống kiểm tra phiếu mượn tồn tại, thuộc về người dùng
 
 Một lượt sử dụng điển hình là xem sách, đăng nhập, chọn sách để mượn, theo dõi phiếu mượn và trả sách. Người dùng chưa có tài khoản cần đăng ký trước; việc xem danh sách và chi tiết sách không yêu cầu đăng nhập.
 
-#### 3.1. Từ tài khoản đến phiếu mượn
+#### 3.1. Tài khoản và phiếu mượn
 
 1. **Tạo tài khoản và đăng nhập.** Người dùng đăng ký bằng `username` và mật khẩu. Username phải duy nhất; Đăng nhập thành công trả về access token JWT để gọi các API được bảo vệ. API `/api/users/me` cho phép xem thông tin tài khoản hiện tại.
 2. **Tra cứu và quản lý sách.** Mỗi đầu sách có thông tin tên, tác giả, thể loại, tổng số bản (`quantity`) và số bản còn cho mượn (`availableQuantity`). Danh sách và chi tiết sách được xem công khai. Thêm hoặc xóa sách yêu cầu đăng nhập.
