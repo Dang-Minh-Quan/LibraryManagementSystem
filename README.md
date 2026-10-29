@@ -56,7 +56,11 @@ Hệ thống kiểm tra phiếu mượn tồn tại, thuộc về người dùng
 | GET | `/api/borrowings/me` | User đã đăng nhập | Xem các phiếu mượn của mình |
 | POST | `/api/borrowings/{id}/return` | User đã đăng nhập | Trả sách của mình |
 
-### 4. OpenAPI Specification
+### 4. Database
+<img width="502" height="635" alt="image" src="https://github.com/user-attachments/assets/d0fe7b9b-4a4c-42c4-814c-f91a22845599" />
+
+
+### 5. OpenAPI Specification
 
 Tài liệu đặc tả API được lưu tại [`openapi.json`](./openapi.json).
 
