@@ -23,7 +23,7 @@ public class User {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
-    protected User() {}
+    public User() {}
 
     public User(String username, String password, Role role) {
         this.username = username;
@@ -33,6 +33,7 @@ public class User {
     }
 
     public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
     public String getUsername() { return username; }
     public String getPassword() { return password; }
     public Role getRole() { return role; }

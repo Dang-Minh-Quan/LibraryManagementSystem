@@ -20,6 +20,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return error(HttpStatus.BAD_REQUEST, exception.getMessage());
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiError> handleIllegalArgument(IllegalArgumentException exception) {
+      return error(HttpStatus.BAD_REQUEST, exception.getMessage());
+    }
+
+
     @ExceptionHandler(InvalidCredentialsException.class)
     ResponseEntity<ApiError> invalidCredentials(InvalidCredentialsException exception) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -35,6 +41,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     ResponseEntity<ApiError> forbidden(AccessDeniedException exception) {
         return error(HttpStatus.FORBIDDEN, "Access denied");
+    }
+
+    @ExceptionHandler(BorrowingException.class)
+    public ResponseEntity<ApiError> handleBorrowingException(BorrowingException exception) {
+      return error(exception.getStatus(),exception.getMessage());
     }
 
     @Override

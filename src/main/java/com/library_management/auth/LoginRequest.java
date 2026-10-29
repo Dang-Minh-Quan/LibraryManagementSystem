@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 public record LoginRequest(
-        @NotBlank @Size(max = 50) @Schema(example = "quanquan") String username,
+        @NotBlank @Size(max = 50) @Schema(example = "dangminhquan") String username,
         @NotBlank @Size(max = 72)
-        @Schema(format = "password", accessMode = Schema.AccessMode.WRITE_ONLY) String password
+        @Schema(format = "12345678", accessMode = Schema.AccessMode.WRITE_ONLY) String password
 ) {}
